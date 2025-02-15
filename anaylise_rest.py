@@ -21,10 +21,14 @@ cursor = conn.cursor()
 
 
 query = """SELECT o.item_id , m.item_name, m.category, 
-m.price, o.order_date,o.order_time, count(*) as all_sales , 
+m.price, count(*) as all_sales , 
 CONCAT('$', FORMAT(m.price * COUNT(*), 2)) AS income 
 FROM menu_items m INNER JOIN order_details o ON m.menu_item_id = o.item_id 
 group by o.item_id ORDER BY `income` DESC """
+
+query2 = """"""
+
+
 
 cursor.execute(query)
 
