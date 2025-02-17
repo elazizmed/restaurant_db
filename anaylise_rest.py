@@ -19,7 +19,7 @@ conn = mysql.connector.connect(
 
 cursor = conn.cursor()
 
-
+# this query for get all income
 query = """SELECT o.item_id , m.item_name, m.category, 
 m.price, count(*) as all_sales , 
 CONCAT('$', FORMAT(m.price * COUNT(*), 2)) AS income 
