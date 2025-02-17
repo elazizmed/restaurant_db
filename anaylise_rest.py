@@ -28,6 +28,7 @@ group by o.item_id ORDER BY `income` DESC """
 
 
 #test
+#test acount commit
 
 
 cursor.execute(query)
