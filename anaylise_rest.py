@@ -27,7 +27,7 @@ FROM menu_items m INNER JOIN order_details o ON m.menu_item_id = o.item_id
 group by o.item_id ORDER BY `income` DESC """
 
 
-
+#test
 
 
 cursor.execute(query)
