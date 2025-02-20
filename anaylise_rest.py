@@ -54,20 +54,40 @@ data3 = cursor.fetchall()
 df3 = pd.DataFrame(data3, columns=["Order_item_id", "item_name", "category", "price", "number_of_orders_by_item", "income" , "chargers" , "passive"])
 
 file_path = os.path.join(folder_path, "orders_and_products.xlsx")
-df4 = pd.read_excel(file_path, sheet_name="income")
+file_path2 = os.path.join(folder_path, "orders_and_products_1.xlsx")
 
-sum_income_df4 = df4['income'].replace({'\$': '', ',': ''}, regex=True).astype(float).sum()
-summary_data = {
-    "Sheet Name": ["income"],
-    "Total Income": [sum_income_df4]
-}
 
-summary_df = pd.DataFrame(summary_data)
-with pd.ExcelWriter(file_path, engine='xlsxwriter') as writer:
-    df1.to_excel(writer, sheet_name="income", index=False)
-    df2.to_excel(writer, sheet_name="income_by_category", index=False)
-    df3.to_excel(writer, sheet_name="charges&passive", index=False)
-    summary_df.to_excel(writer, sheet_name="test", index=False)
+
+
+if os.path.exists(file_path):
+
+        df4 = pd.read_excel(file_path, sheet_name="all_income")
+        df4['income'] = df4['income'].replace({r'\$': '', ',': ''}, regex=True)
+        df4['income'] = pd.to_numeric(df1['income'], errors='coerce').fillna(0)
+        sum_income_df4 = df4['income'].sum()
+
+        summary_data = {
+            "Opirations": ["income","charges","passive"],
+            "Total cache": [sum_income_df4,50,30]
+        }
+
+        summary_df = pd.DataFrame(summary_data)
+
+        with pd.ExcelWriter(file_path2, engine='xlsxwriter') as writer:
+            df1.to_excel(writer, sheet_name="all_income", index=False)
+            df2.to_excel(writer, sheet_name="income_by_category", index=False)
+            df3.to_excel(writer, sheet_name="charges&passive", index=False)
+            summary_df.to_excel(writer, sheet_name="total_income", index=False)
+            print(f" the excel file aredy created !  ")
+    
+else:
+
+    with pd.ExcelWriter(file_path, engine='xlsxwriter') as writer:
+        df1.to_excel(writer, sheet_name="all_income", index=False)
+        df2.to_excel(writer, sheet_name="income_by_category", index=False)
+        df3.to_excel(writer, sheet_name="charges&passive", index=False)
+        print(f" first time creating the excel file ! ")
+        
 
 
 cursor.close()
