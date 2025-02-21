@@ -24,10 +24,13 @@ FROM menu_items m INNER JOIN order_details o ON m.menu_item_id = o.item_id
 GROUP BY o.item_id ORDER BY m.price * COUNT(*) DESC"""
 
 
-query2 = """SELECT m.category, count(*) as all_sales, 
-CONCAT('$', FORMAT(m.price * COUNT(*), 2)) AS income 
-FROM menu_items m INNER JOIN order_details o ON m.menu_item_id = o.item_id 
-GROUP BY m.category ORDER BY m.price * COUNT(*) DESC"""
+query2 = """SELECT m.category, 
+COUNT(*) AS all_sales, 
+CONCAT('$', FORMAT(SUM(m.price), 2)) AS income
+FROM menu_items m
+INNER JOIN order_details o ON m.menu_item_id = o.item_id
+GROUP BY m.category
+ORDER BY SUM(m.price) DESC;"""
 
 query3 = """SELECT o.item_id, m.item_name, m.category, m.price, 
 COUNT(*) AS all_sales, 
@@ -51,10 +54,10 @@ df2 = pd.DataFrame(data2, columns=["category", "number_of_orders_by_item", "inco
 
 cursor.execute(query3)
 data3 = cursor.fetchall()
-df3 = pd.DataFrame(data3, columns=["Order_item_id", "item_name", "category", "price", "number_of_orders_by_item", "income" , "chargers" , "passive"])
+df3 = pd.DataFrame(data3, columns=["Order_item_id", "item_name", "category", "price", "number_of_orders_by_item", "income" , "charges" , "passive"])
 
 file_path = os.path.join(folder_path, "orders_and_products.xlsx")
-file_path2 = os.path.join(folder_path, "orders_and_products_1.xlsx")
+
 
 
 
@@ -63,17 +66,27 @@ if os.path.exists(file_path):
 
         df4 = pd.read_excel(file_path, sheet_name="all_income")
         df4['income'] = df4['income'].replace({r'\$': '', ',': ''}, regex=True)
-        df4['income'] = pd.to_numeric(df1['income'], errors='coerce').fillna(0)
+        df4['income'] = pd.to_numeric(df4['income'], errors='coerce').fillna(0)
         sum_income_df4 = df4['income'].sum()
+
+        df5 = pd.read_excel(file_path, sheet_name="charges&passive")
+        df5['charges'] = df5['charges'].replace({r'\$': '', ',': ''}, regex=True)
+        df5['charges'] = pd.to_numeric(df5['charges'], errors='coerce').fillna(0)
+        sum_charges = df5['charges'].sum()
+
+        df6 = pd.read_excel(file_path, sheet_name="charges&passive")
+        df6['passive'] = df6['passive'].replace({r'\$': '', ',': ''}, regex=True)
+        df6['passive'] = pd.to_numeric(df6['passive'], errors='coerce').fillna(0)
+        sum_passive = df6['passive'].sum()
 
         summary_data = {
             "Opirations": ["income","charges","passive"],
-            "Total cache": [sum_income_df4,50,30]
+            "Total cache": [sum_income_df4,sum_charges,sum_passive]
         }
 
         summary_df = pd.DataFrame(summary_data)
 
-        with pd.ExcelWriter(file_path2, engine='xlsxwriter') as writer:
+        with pd.ExcelWriter(file_path, engine='xlsxwriter') as writer:
             df1.to_excel(writer, sheet_name="all_income", index=False)
             df2.to_excel(writer, sheet_name="income_by_category", index=False)
             df3.to_excel(writer, sheet_name="charges&passive", index=False)
